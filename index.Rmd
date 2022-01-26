@@ -1,0 +1,89 @@
+---
+title: "The Simpsons"
+author: "Brianna Mateo & Camila Maldonado"
+date: "Last updated on `r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    df_print: kable
+    code_folding: hide
+---
+
+<!--
+Comments in HTML are like this! 
+-->
+```{r setup, include=FALSE, message=FALSE}
+
+library(tidyverse)
+library(scales)
+library(readr)
+library(RColorBrewer)
+library(patchwork)
+library(stringi)
+library(stringr) 
+library(sf)
+library(maps)
+library(USAboundaries)
+library(tidycensus)
+library(ggplot2)
+library(usmap)
+colourCount = length(unique(mtcars$hp))
+getPalette = colorRampPalette(brewer.pal(9, "Set1"))
+
+#LOAD THE DATA 
+
+simpsons_locations <- read_csv("simpsons_locations.csv")
+
+simpsons_script_lines <- read_csv("simpsons_script_lines.csv")
+
+simpsons_episodes <- read_csv("simpsons_episodes.csv")
+```
+
+
+# Did The Show Deserve The Hype? 
+
+Since its first debut on December 17th in 1987, The Simpsons became the favorite dysfunctional family on the big screen. The show set in the fictional town of Springfield parodies American life through the adventures of their family members. We will be exploring the data behind approximately 600 episodes of the internationally acclaimed TV show.
+
+![](thesimpsons.jpg)
+
+## How many people were watching the Simpsons?
+
+
+
+```{r}
+
+#US viewers in millions across time from 1986 to 2016 
+most_views <- simpsons_episodes %>% 
+  select(title,original_air_year, us_viewers_in_millions) %>% 
+  group_by(original_air_year) %>% 
+  filter(us_viewers_in_millions != "NA") %>% 
+  summarise(sum = sum(us_viewers_in_millions))
+View(most_views)
+#Imdb rating over time from 1986 to 2016
+most_imdb <- simpsons_episodes %>% 
+  select(title,original_air_year,imdb_rating) %>% 
+  group_by(original_air_year) %>% 
+  filter(imdb_rating != "NA") %>% 
+  summarise(sum = sum(imdb_rating))
+
+#US viewers in millions 
+  
+plot1 <- ggplot(most_views, aes(x = original_air_year, y = sum)) + theme_bw() +
+  geom_line() + labs(title = "US viewers", x = "Original year aired" , y = "US number of viewers in millions") 
+
+#IMDB plot
+plot2 <- ggplot(most_imdb, aes(x = original_air_year, y = sum)) + theme_bw() +
+  geom_line() + labs(title = "Imdb rating", x = "Original year aired" , y = "Imdb rating")
+
+plot1 + plot2 
+
+```
+
+
+
+Through this line graph, we can observe that the first couple of years after the show was officially aired on TV, it was very popular among US viewers with more than 500 M viewers. However, as time passed by, the show had fewer viewers. On the other hand, the ratings had a peak in 1990 followed by a continuous decline. This could have been due to changes in viewers’ interests but also due to the modernization of entertainment introducing streaming services. 
+Nonetheless, with 33.6M viewers, “Bart gets an F” was the most viewed episode of all the 600 episodes analyzed.
+
+![](bartgetsanF.jpg){width=50%}
